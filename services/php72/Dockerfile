@@ -1,18 +1,24 @@
 ARG PHP_VERSION
 FROM ${PHP_VERSION}
 
-ARG TZ
 ARG CONTAINER_PACKAGE_URL
+ARG TZ
+ARG PHP_EXTENSIONS
 
-RUN if [ "${CONTAINER_PACKAGE_URL}" != "" ]; then \
-        sed -i "s/dl-cdn.alpinelinux.org/${CONTAINER_PACKAGE_URL}/g" /etc/apk/repositories; \
-    fi
+#RUN apk --no-cache add tzdata \
+#    && cp "/usr/share/zoneinfo/$TZ" /etc/localtime \
+#    && echo "$TZ" > /etc/timezone
 
-RUN apk update
+RUN if [ $CONTAINER_PACKAGE_URL ] ; then sed -i "s/dl-cdn.alpinelinux.org/${CONTAINER_PACKAGE_URL}/g" /etc/apk/repositories ; fi
 
-# Extension
-RUN docker-php-ext-install mysqli pdo pdo_mysql
-RUN docker-php-ext-enable pdo_mysql
+COPY ./extensions /tmp/extensions
+WORKDIR /tmp/extensions
+RUN chmod +x install.sh \
+    && sh install.sh \
+    && rm -rf /tmp/extensions
+
+ADD ./extensions/install-php-extensions  /usr/local/bin/
+RUN chmod uga+x /usr/local/bin/install-php-extensions
 
 # Composer
 RUN php -r "copy('https://install.phpcomposer.com/installer', 'composer-setup.php');"
