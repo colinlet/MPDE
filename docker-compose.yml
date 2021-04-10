@@ -41,18 +41,21 @@ services:
   redis:
     container_name: redis-dev
     image: redis:${REDIS_VERSION}
-    restart: always
     ports:
       - "${REDIS_PORT}:6379"
+    volumes:
+      - "./services/redis/redis.conf:/etc/redis.conf"
+      - "${DATA_DIR}/redis:/data:rw"
+    restart: always
   mysql:
     container_name: mysql-dev
     image: mysql:${MYSQL_VERSION}
     command: --default-authentication-plugin=mysql_native_password
-    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: "${MYSQL_PASSWORD}"
     ports:
       - "${MYSQL_PORT}:3306"
+    restart: always
   golang:
     container_name: golang-dev
     image: golang:${GO_VERSION}
