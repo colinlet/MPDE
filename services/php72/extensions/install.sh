@@ -392,6 +392,19 @@ if [[ -z "${EXTENSIONS##*,protobuf,*}" ]]; then
     fi
 fi
 
+if [[ -z "${EXTENSIONS##*,protobuf_v2,*}" ]]; then
+    echo "---------- Install protobuf version 2.0 ----------"
+    isPhpVersionGreaterOrEqual 7 0
+    if [[ "$?" = "1" ]]; then
+        extensionName="php-protobuf-0.12.3"
+        tar -zxvf ${extensionName}.tar.gz
+        ( cd  ${extensionName} && phpize && ./configure && make && make install )
+        docker-php-ext-enable protobuf
+    else
+        echo "yar requires PHP >= 7.0.0, installed version is ${PHP_VERSION}"
+    fi
+fi
+
 if [[ -z "${EXTENSIONS##*,yac,*}" ]]; then
     isPhpVersionGreaterOrEqual 7 0
     if [[ "$?" = "1" ]]; then
